@@ -29,15 +29,7 @@ class FragmentMain: FragmentBase<FragmentMainBinding>(R.layout.fragment_main)  {
 
         binding.fecha.text = getCurrentDate()
 
-        viewModel.getSchedule(getCurrentDate()).observe(this) {
-            it?.let {
-                binding.list.apply {
-                    adapter = AdapterList(it, requireContext()){
-                        onSelect(it)
-                    }
-                }
-            }
-        }
+
 
 
         binding.search.setOnClickListener {
@@ -56,11 +48,33 @@ class FragmentMain: FragmentBase<FragmentMainBinding>(R.layout.fragment_main)  {
                 query.visibility = View.GONE
                 close.visibility = View.GONE
                 query.setText("")
+                onDefault()
             }
         }
 
         binding.query.addTextChangedListener {
+            viewModel.getSearchShow(it.toString().trim()).observe(this){
+                it?.let {
+                    binding.list.apply {
+                        adapter = AdapterList(emptyList(), it, true, requireContext(), {
+                        },{})
+                    }
+                }
+            }
+        }
 
+        onDefault()
+    }
+
+    private fun onDefault(){
+        viewModel.getSchedule(getCurrentDate()).observe(this) {
+            it?.let {
+                binding.list.apply {
+                    adapter = AdapterList(it, emptyList(), false, requireContext(), {
+                        onSelect(it)
+                    },{})
+                }
+            }
         }
     }
 
